@@ -63,11 +63,17 @@ contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 warp = warp_image(contours, org)
 
+thresh = cv2.adaptiveThreshold(warp, 255, 1, 1, 11, 2)
 
-# img_color = cv2.cvtColor(warp, cv2.COLOR_GRAY2BGR)
-# cv2.drawContours(img_color, [approx], -1, (0, 255, 0) , 3)
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-cv2.imshow('warped', warp)
+
+
+img_color = cv2.cvtColor(warp, cv2.COLOR_GRAY2BGR)
+cv2.drawContours(img_color, contours, 10, (0, 255, 0) , 3)
+
+cv2.imshow('warped', img_color)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
