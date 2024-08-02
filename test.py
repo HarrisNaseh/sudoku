@@ -1,15 +1,16 @@
 import cv2
 import numpy as np
 import imutils
+import model
  
 
-def warp_image(contours, orginal_pic):
+def warp_image(contours, orginal_pic, ratio):
 
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    # contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
     maxContour = contours[0]
 
-    esp = 0.015 * cv2.arcLength(maxContour, True)
+    esp = 0.07 * cv2.arcLength(maxContour, True)
     approx = cv2.approxPolyDP(maxContour, esp, True)
 
     pts = approx.reshape(4, 2)
@@ -50,33 +51,59 @@ def warp_image(contours, orginal_pic):
 
 # To read image from disk, we use
 # cv2.imread function, in below method,
-img = cv2.imread("handwritten.png", cv2.IMREAD_GRAYSCALE)
-# im2 = cv2.imread("Media.jpg", cv2.IMREAD_GRAYSCALE)
+# img = cv2.imread("printed.jpg", cv2.IMREAD_GRAYSCALE)
+img = cv2.imread("printed.jpg", cv2.IMREAD_GRAYSCALE)
 ratio = img.shape[0] / 400.
 org = img.copy()
 img = imutils.resize(img, height = 400)
 
-blur = cv2.GaussianBlur(img, (5,5), 0) 
+blur = cv2.GaussianBlur(img, (5,5), 1) 
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
-
-contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-warp = warp_image(contours, org)
-
-thresh = cv2.adaptiveThreshold(warp, 255, 1, 1, 11, 2)
 
 contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
+warp = warp_image(contours, org, ratio)
+
+thresh = cv2.adaptiveThreshold(warp, 255, 1, 1, 11, 2)
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+#THe 81 biggest contours in the image is now the 81 squares of the sudoko
+contours = sorted(contours, key=cv2.contourArea, reverse=True)[1:82]
+
+contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1]*warp.shape[1] + cv2.boundingRect(ctr)[0])
+
+contours = contours[0:9]
 
 
 img_color = cv2.cvtColor(warp, cv2.COLOR_GRAY2BGR)
-cv2.drawContours(img_color, contours, 10, (0, 255, 0) , 3)
+for i in range(len(contours)):
+    # Get the bounding rectangle for the contour
+    x, y, w, h = cv2.boundingRect(contours[i])
 
-cv2.imshow('warped', img_color)
+    # Extract the square from the image
+    square = warp[y:y+h, x:x+w]
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    number = model.predict(square)
+    print("Predicted Number: ", number)
+    cv2.drawContours(img_color, contours, i, (0, 255, 0) , 3)
+    cv2.imshow('warped', img_color)
+    cv2.waitKey(0)
+    
+    cv2.destroyAllWindows()
+
+
+# print(cv2.contourArea(contours[0]))
+# img_color = cv2.cvtColor(org, cv2.COLOR_GRAY2BGR)
+
+# for i in range(len(contours)):
+
+#     cv2.drawContours(img_color, contours, i, (0, 255, 0) , 3)
+# #     print(cv2.contourArea(contours[i]))
+#     cv2.imshow('warped', img_color)
+
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
 
 
