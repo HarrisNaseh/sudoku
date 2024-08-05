@@ -1,4 +1,4 @@
-import sudoko
+import sudoku
 
 # board = [
 #     [0, 0, 5, 0, 0, 9, 0, 0, 0],
@@ -25,13 +25,15 @@ board = [
 ]
 
 
-s = sudoko.sudoko_solver(board)
+s = sudoku.sudoko_solver()
+
+# s.insert(3, 2, 6)
+# print(s.board)
+# print(s.print_board())
+# o = s._get_least_conflicts(board)
+# sorted_d_as_list = sorted(o.items(), key=lambda item: len(item[1]))
+# print(sorted_d_as_list)
+# s.solve()
+
 
 # print(s.print_board())
-o = s._get_least_conflicts(board)
-sorted_d_as_list = sorted(o.items(), key=lambda item: len(item[1]))
-print(sorted_d_as_list)
-s.solve()
-
-
-print(s.print_board())
