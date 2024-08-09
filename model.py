@@ -19,8 +19,8 @@ def predict(img):
     image = image.reshape(1, 28, 28, 1)
     image /= 255
 
-    plt.imshow(image.reshape(28, 28), cmap='Greys')
-    plt.show()
+   #  plt.imshow(image.reshape(28, 28), cmap='Greys')
+   #  plt.show()
 
     pred = model.predict(image.reshape(1, 28, 28, 1), batch_size=1)
 

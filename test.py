@@ -53,7 +53,7 @@ def warp_image(contours, orginal_pic, ratio):
 # To read image from disk, we use
 # cv2.imread function, in below method,
 # img = cv2.imread("printed.jpg", cv2.IMREAD_GRAYSCALE)
-img = cv2.imread("handwritten.png", cv2.IMREAD_GRAYSCALE)
+img = cv2.imread("printed.jpg", cv2.IMREAD_GRAYSCALE)
 ratio = img.shape[0] / 400.
 org = img.copy()
 img = imutils.resize(img, height = 400)
@@ -65,34 +65,37 @@ contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
 warp = warp_image(contours, org, ratio)
-plt.imshow(warp, cmap='Greys')
-plt.show()
-# thresh = cv2.adaptiveThreshold(warp, 255, 1, 1, 11, 2)
-# contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-#THe 81 biggest contours in the image is now the 81 squares of the sudoko
-# contours = sorted(contours, key=cv2.contourArea, reverse=True)[1:82]
+# cv2.imshow("bryg", warp)
 
-# contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1])
+# cv2.waitKey()
+# cv2.destroyAllWindows()
+thresh = cv2.adaptiveThreshold(warp, 255, 1, 1, 11, 2)
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-# solver = sudoku.sudoko_solver()
-# for i in range(0, 81, 9):
-#     row_contour = contours[i: i + 9]
-#     row_contour = sorted(row_contour, key= lambda ctr: cv2.boundingRect(ctr)[0])
-#     for q in range(len(row_contour)):
-#         x, y, w, h = cv2.boundingRect(row_contour[q])
-#         # Extract the square from the image
-#         square = warp[y:y+h, x:x+w]
-#         number = model.predict(square)
+# #The 81 biggest contours in the image is now the 81 squares of the sudoko
+contours = sorted(contours, key=cv2.contourArea, reverse=True)[1:82]
 
-#         if q < 3:
-#             solver.insert((i / 9), 0, number)
-#         elif q < 6: 
-#             solver.insert((i / 9), 1, number)
-#         else:
-#             solver.insert((i / 9), 2, number)
+contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1])
 
+solver = sudoku.sudoko_solver()
+for i in range(0, 81, 9):
+    row_contour = contours[i: i + 9]
+    row_contour = sorted(row_contour, key= lambda ctr: cv2.boundingRect(ctr)[0])
+    for q in range(len(row_contour)):
+        x, y, w, h = cv2.boundingRect(row_contour[q])
+        # Extract the square from the image
+        square = warp[y:y+h, x:x+w]
+        number = model.predict(square)
 
+        if q < 3:
+            solver.insert((i / 9), 0, number)
+        elif q < 6: 
+            solver.insert((i / 9), 1, number)
+        else:
+            solver.insert((i / 9), 2, number)
+solver.solve()
+print(solver.print_board())
 
 
 
@@ -128,9 +131,9 @@ plt.show()
 #     # print("Predicted Number: ", number)
 #     print(cv2.boundingRect(contours[i]))
 #     cv2.drawContours(img_color, contours, i, (0, 255, 0) , 3)
-#     # cv2.imshow('warped', img_color)
-#     plt.imshow(img_color, cmap='Greys')
-#     plt.show()
+#     cv2.imshow('warped', img_color)
+#     # plt.imshow(img_color, cmap='Greys')
+#     # plt.show()
 #     cv2.waitKey(0)
     
 #     cv2.destroyAllWindows()
